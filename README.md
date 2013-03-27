@@ -25,17 +25,22 @@ Usage
 
     include wait_for
 
-    # This waits until the Jenkins service has started.
+    # Example for Linux: This waits until the sshd service has started.
     #
-    # Remark 1: This example is actually Windows, just because my current use
-    # case is Puppet on Windows. Should work on Linux as well, of course with
-    # a different query command and a different regex.
-    # Remark 2: You do not need to do this if you use a proper service resource
+    # Remark: You do not need to do this if you use a proper service resource
     # to start the service. After all, this is just an example.
+    wait_for { 'service sshd status':
+      regex    => '.*is running.*',
+      waitfor  => true,
+    }
+
+    # Example for Windows: This waits until the MySQL5 service has started.
     #
-    wait_for { 'sc query Jenkins':
-      regex             => '.*STATE\s*:\s*4\s*RUNNING.*',
-      waitfor           => true,
+    # Remark: You do not need to do this if you use a proper service resource
+    # to start the service. After all, this is just an example.
+    # wait_for { 'sc query MySQL5':
+      regex   => '.*STATE\s*:\s*4\s*RUNNING.*',
+      waitfor => true,
     }
 
     # This will wait until the command returns with exit code 42. Of course,

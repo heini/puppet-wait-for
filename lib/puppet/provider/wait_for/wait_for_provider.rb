@@ -1,9 +1,6 @@
 Puppet::Type.type(:wait_for).provide(:wait_for) do
     desc "Waits for something to happen."
 
-    confine :osfamily => :windows
-    defaultfor :osfamily => :windows
-
     def waitfor
         @polling_frequency = resource[:polling_frequency]
         @max_retries = resource[:max_retries]
