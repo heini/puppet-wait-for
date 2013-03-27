@@ -6,14 +6,14 @@ Puppet::Type.newtype(:wait_for) do
         desc "The command to execute, the output of this command will be matched against regex."
     end
 
-    newparam(:exit_code) do
+    newproperty(:exit_code) do
         desc "The exit code to expect."
         munge do |value|
           Integer(value)
         end
     end
 
-    newparam(:regex) do
+    newproperty(:regex) do
         desc "The regex to match the commmand's output against."
         munge do |value|
           Regexp.new(value)
@@ -34,10 +34,6 @@ Puppet::Type.newtype(:wait_for) do
         munge do |value|
           Integer(value)
         end
-    end
-
-    newproperty(:waitfor) do
-        desc "Um, just set waitfor => true and don't ask for the reason, okay?"
     end
 
     validate do
