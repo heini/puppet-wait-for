@@ -5,7 +5,7 @@ A pseudo resource type for puppet that enables you to wait for certain condition
 
 Warning: By using this module you are leaving the pure puppet philosophy - this is not really a resource which's state can updated/kept in synch by puppet. Also, you might be tempted to use this module to work around issues that should be fixed by other means.
 
-That said, there are situations where this might come in handy - for example, when you need to start/stop services in some asynchronous fashion. Puppet's basic assumption is, that when the code to update one resource has finished, then the resource is in the desired state. In the real world, this is not always the case, especially if you are doing a lot of things via exec resources.
+That said, there are situations where this might come in handy - for example, when you need to start/stop services in some asynchronous fashion. Puppet's basic assumption is, that when the code to update a resource has finished, then the resource is in the desired state, period. In the real world, this is not always the case, especially if you are doing a lot of things via exec resources and even more if the exec commandforks or kicks off a process which needs some time to come up.
 
 Installation
 ------------
@@ -25,7 +25,7 @@ Usage
     #
     # Remark 1: This example is actually Windows, just because my current use
     # case is Puppet on Windows. Should work on Linux as well, of course with
-    # with a different query command and a different regex.
+    # a different query command and a different regex.
     # Remark 2: You do not need to do this if you use a proper service resource
     # to start the service. After all, this is just an example.
     #
@@ -45,12 +45,12 @@ Usage
       waitfor           => true,
     }
 
-    # This is actually illegal because one of regex or exit_code has to be specified 
+    # This is actually illegal because one of regex or exit_code has to be specified.
     # wait_for { 'echo abc':
     #   waitfor           => true,
     # }
 
-    # This is also illegal because only one of regex or exit_code can be specified 
+    # This is also illegal because only one of regex or exit_code can be specified.
     # wait_for { 'echo xyz':
     #   regex             => 'whatever',
     #   exit_code         => 0,
