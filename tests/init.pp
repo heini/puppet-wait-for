@@ -46,3 +46,9 @@ include wait_for
 #   exit_code => 0,
 #   waitfor   => true,
 # }
+
+# wait_for { 'without implicit namevar':
+#   query   => 'echo foobar',
+#   regex   => 'foobar',
+#   waitfor => true,
+# }
