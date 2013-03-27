@@ -1,0 +1,4 @@
+puppet-wait-for
+===============
+
+A pseudo resource type for puppet that enables you to wait for certain conditions. You can use shell commands to query arbitrary things and either react on the exit code or match the output of the command against a regular expression.
