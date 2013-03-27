@@ -1,0 +1,2 @@
+class wait_for {
+}
