@@ -10,7 +10,11 @@ That said, there are situations where this might come in handy - for example, wh
 Installation
 ------------
 
-Go to your puppet modules folder and do
+Either install the latest release from puppet forge:
+
+    puppet module install basti1302-wait_for
+
+or install the current head from the git repository by going to your puppet modules folder and do
 
     git clone git@github.com:basti1302/puppet-wait-for.git wait_for
 
