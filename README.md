@@ -37,7 +37,7 @@ Usage
     #
     # Remark: You do not need to do this if you use a proper service resource
     # to start the service. After all, this is just an example.
-    # wait_for { 'sc query MySQL5':
+    wait_for { 'sc query MySQL5':
       regex   => '.*STATE\s*:\s*4\s*RUNNING.*',
     }
 
