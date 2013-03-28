@@ -1,5 +1,5 @@
 name 'basti1302-wait_for'
-version '0.0.1'
+version '0.2.0'
 summary 'A pseudo resource type to wait for a condition to become satisfied.'
 description "A pseudo resource type for puppet that enables you to wait for
 certain conditions. You can use shell commands to query arbitrary things and
