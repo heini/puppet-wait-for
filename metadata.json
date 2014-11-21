@@ -1,0 +1,61 @@
+{
+  "name": "basti1302-wait_for",
+  "version": "0.3.0",
+  "source": "UNKNOWN",
+  "author": "Bastian Krol",
+  "license": "Apache License, Version 2.0",
+  "summary": "A pseudo resource type to wait for a condition to become satisfied.",
+  "description": "A pseudo resource type for puppet that enables you to wait for\ncertain conditions. You can use shell commands to query arbitrary things and\neither react on the exit code or match the output of the command against a\nregular expression.",
+  "project_page": "https://github.com/basti1302/puppet-wait-for",
+  "dependencies": [
+
+  ],
+  "types": [
+    {
+      "name": "wait_for",
+      "doc": "Waits for something to happen.",
+      "properties": [
+        {
+          "name": "exit_code",
+          "doc": "The exit code to expect.\n\n"
+        },
+        {
+          "name": "regex",
+          "doc": "The regex to match the commmand's output against.\n\n"
+        },
+        {
+          "name": "seconds",
+          "doc": "How long to just wait.\n\n"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "query",
+          "doc": "The command to execute, the output of this command will be matched against regex.\n\n"
+        },
+        {
+          "name": "polling_frequency",
+          "doc": "How long to sleep in between retries.\n\n"
+        },
+        {
+          "name": "max_retries",
+          "doc": "How often to retry the query before timing out.\n\n"
+        }
+      ],
+      "providers": [
+        {
+          "name": "wait_for",
+          "doc": "Waits for something to happen."
+        }
+      ]
+    }
+  ],
+  "checksums": {
+    "Modulefile": "f5c0af28d141eb1ca28ebc54596742bf",
+    "README.md": "a2457f239b0a858d1a15a6ba96064767",
+    "lib/puppet/provider/wait_for/wait_for_provider.rb": "41d6d0be3555a6b6a5da0ec3b98bf2be",
+    "lib/puppet/type/wait_for.rb": "d99bfd347dca34bb61ef74d39079ede8",
+    "manifests/init.pp": "86fecd18b2a8e02fdc29676e47958857",
+    "tests/init.pp": "60a0608102ab9a4712274a98d4acc83f"
+  }
+}
