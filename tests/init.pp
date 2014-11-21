@@ -32,6 +32,11 @@ include wait_for
 #   max_retries       => 5,
 # }
 
+# This will simply wait for one minute
+# wait_for { 'a_minute':
+#   seconds => 60,
+# }
+
 # This is actually illegal because one of regex or exit_code has to be specified.
 # wait_for { 'echo abc':
 # }
