@@ -49,6 +49,12 @@ Puppet::Type.type(:wait_for).provide(:wait_for) do
         end
     end 
 
+    def seconds
+        seconds = resource[:seconds]
+        info "Waiting for #{seconds} seconds..."
+        sleep(seconds)
+        return seconds
+    end
 
     private
 

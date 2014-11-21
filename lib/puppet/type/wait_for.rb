@@ -20,6 +20,13 @@ Puppet::Type.newtype(:wait_for) do
         end
     end
 
+    newproperty(:seconds) do
+        desc "How long to just wait."
+        munge do |value|
+          Integer(value)
+        end
+    end
+
     newparam(:polling_frequency) do
         desc "How long to sleep in between retries."
         defaultto 0.5
@@ -37,11 +44,11 @@ Puppet::Type.newtype(:wait_for) do
     end
 
     validate do
-        unless self[:regex] or self[:exit_code]
-            fail "Exactly one of regex or exit_code is required."
-        end
-        if self[:regex] and self[:exit_code]
-            fail "Use either regex or exit_code, not both."
-        end
+      unless self[:regex] or self[:exit_code] or self[:seconds]
+          fail "Exactly one of regex, seconds or exit_code is required."
+      end
+      if self[:regex] and self[:exit_code] or self[:regex] and self[:seconds] or self[:exit_code] and self[:seconds]
+          fail "Attributes regex, seconds and exit_code are mutually exclusive."
+      end
     end
 end
