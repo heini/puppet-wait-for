@@ -1,6 +1,6 @@
 {
   "name": "basti1302-wait_for",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "source": "UNKNOWN",
   "author": "Bastian Krol",
   "license": "Apache License, Version 2.0",
@@ -40,6 +40,10 @@
         {
           "name": "max_retries",
           "doc": "How often to retry the query before timing out.\n\n"
+        },
+        {
+          "name": "environment",
+          "doc": "An array of strings of the form 'key=value', which will be injected into the environment of the query command.\n\n"
         }
       ],
       "providers": [
@@ -51,11 +55,10 @@
     }
   ],
   "checksums": {
-    "Modulefile": "f5c0af28d141eb1ca28ebc54596742bf",
-    "README.md": "a2457f239b0a858d1a15a6ba96064767",
-    "lib/puppet/provider/wait_for/wait_for_provider.rb": "41d6d0be3555a6b6a5da0ec3b98bf2be",
-    "lib/puppet/type/wait_for.rb": "d99bfd347dca34bb61ef74d39079ede8",
-    "manifests/init.pp": "86fecd18b2a8e02fdc29676e47958857",
-    "tests/init.pp": "60a0608102ab9a4712274a98d4acc83f"
+    "README.md": "749bfe891e8900cbe697df9c4edeb10b",
+    "lib/puppet/provider/wait_for/wait_for_provider.rb": "a52cf805be60995075b58a690d0fb530",
+    "lib/puppet/type/wait_for.rb": "f46cd89e9461bbf6ac8ef9e1989cb5a1",
+    "manifests/init.pp": "e741441639f2c254262a65e89bec8c67",
+    "tests/init.pp": "af6f34237261f04bcd8b94aaa2707d19"
   }
 }

@@ -42,6 +42,20 @@ Puppet::Type.newtype(:wait_for) do
           Integer(value)
         end
     end
+  
+    newparam(:environment) do
+        desc "An array of strings of the form 'key=value', which will be injected into the environment of the query command."
+        munge do |value|
+          Array(value)
+        end
+        validate do |value|
+            value.each do |item|
+                unless item =~ /^\w+=.*/
+                    raise ArgumentError, "%s is not a key=value pair" % item
+                end
+            end
+        end
+    end
 
     validate do
         unless self[:regex] or self[:exit_code] or self[:seconds]

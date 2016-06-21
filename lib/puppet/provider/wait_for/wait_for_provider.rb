@@ -3,6 +3,7 @@ Puppet::Type.type(:wait_for).provide(:wait_for) do
 
     def exit_code
         query = resource[:query]
+        set_environment
         `#{query}`
         return $?
     end
@@ -25,6 +26,7 @@ Puppet::Type.type(:wait_for).provide(:wait_for) do
     def regex
         query = resource[:query]
         regex = resource[:regex]
+        set_environment
         output = `#{query}`
         if output =~ regex
             info "Query output matched regex."
@@ -63,8 +65,18 @@ Puppet::Type.type(:wait_for).provide(:wait_for) do
         @polling_frequency = resource[:polling_frequency]
         @max_retries = resource[:max_retries]
     end
+  
+    def set_environment
+        environment = resource[:environment]
+        environment.each do |item|
+            (key, value) = item.split('=')
+            debug "Setting environment variable #{key}."
+            ENV[key] = value
+        end
+    end
 
     def query_and_wait(error_message)
+        set_environment
         for i in 1..@max_retries
             debug "Retry #{i}"
             output = `#{@query}`
