@@ -43,8 +43,9 @@ Puppet::Type.newtype(:wait_for) do
         end
     end
   
-    newparam(:environment) do
+    newparam(:environment, :array_matching => :all) do
         desc "An array of strings of the form 'key=value', which will be injected into the environment of the query command."
+        defaultto []
         munge do |value|
           Array(value)
         end
