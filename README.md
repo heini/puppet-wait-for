@@ -55,7 +55,7 @@ Usage
     wait_for { 'a_minute':
       seconds => 60,
     }
-    
+
     # This will execute a command and inject some environment variables (just like 'exec' does).
     wait_for { 'env':
       environment => ['FOO=bar', 'BAR=baz'],
