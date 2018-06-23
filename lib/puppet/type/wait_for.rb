@@ -9,7 +9,7 @@ module Mixins
   module InstanceMethods
 
     # Defining a retrieve method seems to stop Puppet looking for an
-    # exit_code getter method in the provider.
+    # getter method in the provider.
     #
     # The idea is copied from the Exec type.
     #
@@ -26,7 +26,7 @@ module Mixins
     end
 
     # Defining a sync method seems to stop Puppet looking for an
-    # exit_code= setter method in the provider.
+    # setter method in the provider.
     #
     def sync
       tries = self.resource[:max_retries]
@@ -68,8 +68,10 @@ Puppet::Type.newtype(:wait_for) do
     A lot of this code is copy/pasted from Exec."
 
   # Create a new check mechanism.  It's basically just a parameter that
-  # provides one extra 'check' method. This is copied from the Exec type,
-  # in support of the :refreshonly feature.
+  # provides one extra 'check' method.
+  #
+  # This is copied from the Exec type, in support of the :refreshonly
+  # feature.
   #
   def self.newcheck(name, options = {}, &block)
     @checks ||= {}
@@ -84,7 +86,10 @@ Puppet::Type.newtype(:wait_for) do
 
   # Verify that we pass all of the checks.  The argument determines whether
   # we skip the :refreshonly check, which is necessary because we now check
-  # within refresh
+  # within refresh.
+  #
+  # Copied from Exec, in support of the :refreshonly feature.
+  #
   def check_all_attributes(refreshing = false)
     self.class.checks.each { |check|
       next if refreshing and check == :refreshonly
@@ -152,7 +157,7 @@ Puppet::Type.newtype(:wait_for) do
       attribute. Multiple environment variables should be specified as an
       array.
 
-      This is copied from the Exec type."
+      This was copied from the Exec type."
 
     validate do |values|
       values = [values] unless values.is_a?(Array)
@@ -170,7 +175,7 @@ Puppet::Type.newtype(:wait_for) do
       and will be stopped. The timeout is specified in seconds. The default
       timeout is 300 seconds and you can set it to 0 to disable the timeout.
 
-      This is copied from the Exec type."
+      This was copied from the Exec type."
 
     munge do |value|
       value = value.shift if value.is_a?(Array)
@@ -192,7 +197,7 @@ Puppet::Type.newtype(:wait_for) do
       Note that the timeout parameter applies to each try rather than
       to the complete set of tries.
 
-      This is copied from the Exec tries parameter."
+      This was copied from the Exec 'tries' parameter."
 
     munge do |value|
       if value.is_a?(String)
@@ -211,7 +216,7 @@ Puppet::Type.newtype(:wait_for) do
   newparam(:polling_frequency) do
     desc "The time to sleep in seconds between 'tries'.
 
-      This is copied from the Exec try_sleep parameter."
+      This was copied from the Exec 'try_sleep' parameter."
 
     munge do |value|
       value = Float(value)
@@ -224,6 +229,7 @@ Puppet::Type.newtype(:wait_for) do
 
   newcheck(:refreshonly) do
     desc "Based on the Exec refreshonly parameter.
+
       The command should only be run as a
       refresh mechanism for when a dependent object is changed.  It only
       makes sense to use this option when this command depends on some
