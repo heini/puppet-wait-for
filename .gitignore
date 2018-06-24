@@ -2,3 +2,5 @@
 pkg
 .idea
 .project
+Gemfile.lock
+spec/fixtures
