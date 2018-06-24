@@ -56,6 +56,17 @@ describe Puppet::Type.type(:wait_for) do
     )
   end
 
+  it 'errors out if environment is not an array' do
+    expect {
+      Puppet::Type.type(:wait_for).new(
+        :query  => 'echo foo bar',
+        :environment => 'foo',
+      )
+    }.to raise_error(
+      Puppet::ResourceError, %r{foo is not an array}
+    )
+  end
+
   it 'errors out if environment is not an array of strings like key=value' do
     expect {
       Puppet::Type.type(:wait_for).new(

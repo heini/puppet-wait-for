@@ -46,13 +46,13 @@ Puppet::Type.newtype(:wait_for) do
   newparam(:environment, :array_matching => :all) do
     desc "An array of strings of the form 'key=value', which will be injected into the environment of the query command."
     defaultto []
-    munge do |value|
-      Array(value)
-    end
     validate do |value|
+      unless value.is_a?(Array)
+        raise ArgumentError, "#{value} is not an array"
+      end
       value.each do |item|
         unless item =~ /^\w+=.*/
-          raise ArgumentError, "%s is not a key=value pair" % item
+          raise ArgumentError, "#{item} is not a key=value pair"
         end
       end
     end
