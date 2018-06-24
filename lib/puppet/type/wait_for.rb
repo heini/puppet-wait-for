@@ -46,13 +46,13 @@ Puppet::Type.newtype(:wait_for) do
   newparam(:environment, :array_matching => :all) do
     desc "An array of strings of the form 'key=value', which will be injected into the environment of the query command."
     defaultto []
-    munge do |value|
-      Array(value)
-    end
     validate do |value|
+      unless value.is_a?(Array)
+        raise ArgumentError, "#{value} is not an array"
+      end
       value.each do |item|
         unless item =~ /^\w+=.*/
-          raise ArgumentError, "%s is not a key=value pair" % item
+          raise ArgumentError, "#{item} is not a key=value pair"
         end
       end
     end
@@ -62,7 +62,9 @@ Puppet::Type.newtype(:wait_for) do
     unless self[:regex] or self[:exit_code] or self[:seconds]
       fail "Exactly one of regex, seconds or exit_code is required."
     end
-    if self[:regex] and self[:exit_code] or self[:regex] and self[:seconds] or self[:exit_code] and self[:seconds]
+    if (self[:regex] and not self[:exit_code].nil?) or
+       (self[:regex] and not self[:seconds].nil?) or
+       (not self[:exit_code].nil? and not self[:seconds].nil?)
       fail "Attributes regex, seconds and exit_code are mutually exclusive."
     end
   end
