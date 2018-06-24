@@ -32,7 +32,7 @@ describe Puppet::Type.type(:wait_for) do
   end
 
   bad_opts = [
-    # {:query  => 'echo foo bar', :regex  => 'foo', :exit_code => 42}, FIXME. This is failing but it should pass.
+    {:query  => 'echo foo bar', :regex  => 'foo', :exit_code => 42},
     {:query  => 'echo foo bar', :regex  => 'foo', :exit_code => 42, :seconds => 42},
     {:query  => 'echo foo bar', :regex  => 'foo', :seconds => 42},
     {:query  => 'echo foo bar', :exit_code => 42, :seconds => 42},

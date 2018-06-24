@@ -62,7 +62,9 @@ Puppet::Type.newtype(:wait_for) do
     unless self[:regex] or self[:exit_code] or self[:seconds]
       fail "Exactly one of regex, seconds or exit_code is required."
     end
-    if self[:regex] and self[:exit_code] or self[:regex] and self[:seconds] or self[:exit_code] and self[:seconds]
+    if (self[:regex] and not self[:exit_code].nil?) or
+       (self[:regex] and not self[:seconds].nil?) or
+       (not self[:exit_code].nil? and not self[:seconds].nil?)
       fail "Attributes regex, seconds and exit_code are mutually exclusive."
     end
   end
