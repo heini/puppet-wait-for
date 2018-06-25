@@ -1,106 +1,56 @@
+require 'puppet/util/execution'
+
 Puppet::Type.type(:wait_for).provide(:wait_for) do
-  desc "Waits for something to happen."
+  include Puppet::Util::Execution
 
-  def exit_code
-    fetch_parameters
-    set_environment
-    `#{@query}`
-    return $?
-  end
+  def run(command)
+    output = nil
 
-  def exit_code=(expected)
-    info "waiting until the exit code of #{@query} is #{expected}"
-    info "polling frequency #{@polling_frequency}, max retries #{@max_retries}"
-
-    message = set_message("the exit code of #{@query} became #{expected}")
-
-    query_and_wait(message) do |exit_code, output|
-      if expected == exit_code
-        info "Detected expected exit code."
-        return expected
-      else
-        debug "Exit code is #{exit_code} but we are waiting for #{expected}."
+    begin
+      environment = {}
+      if envlist = resource[:environment]
+        envlist = [envlist] unless envlist.is_a? Array
+        envlist.each do |setting|
+          if setting =~ /^(\w+)=((.|\n)+)$/
+            env_name = $1
+            value = $2
+            if environment.include?(env_name) || environment.include?(env_name.to_sym)
+              warning _("Overriding environment setting '%{env_name}' with '%{value}'") % { env_name: env_name, value: value }
+            end
+            environment[env_name] = value
+          else
+            warning _("Cannot understand environment setting %{setting}") % { setting: setting.inspect }
+          end
+        end
       end
-    end
-  end
 
-  def regex
-    fetch_parameters
-    set_environment
-    output = `#{@query}`
-    if output =~ @regex
-      info "Query output matched regex."
-      return @regex
-    else
-      return nil
-    end
-  end
-
-  def regex=(regex)
-    fetch_parameters
-
-    info "waiting until the output of #{@query} matches #{regex}"
-    info "polling frequency #{@polling_frequency}, max retries #{@max_retries}"
-
-    message = set_message("the output of #{@query} matched #{regex}")
-
-    query_and_wait(message) do |exit_code, output|
-      if output =~ regex
-        info "Query output matched regex."
-        return regex
-      else
-        debug "Query output #{output} did not match regex #{regex}."
+      # Ruby 2.1 and later interrupt execution in a way that bypasses error
+      # handling by default. Passing Timeout::Error causes an exception to be
+      # raised that can be rescued inside of the block by cleanup routines.
+      #
+      # This is backwards compatible all the way to Ruby 1.8.7.
+      Timeout::timeout(resource[:timeout], Timeout::Error) do
+        # note that we are passing "false" for the "override_locale" parameter, which ensures that the user's
+        # default/system locale will be respected.  Callers may override this behavior by setting locale-related
+        # environment variables (LANG, LC_ALL, etc.) in their 'environment' configuration.
+        output = Puppet::Util::Execution.execute(['/bin/sh', '-c', command],
+                                :failonfail => false,
+                                :combine => true,
+                                :override_locale => false,
+                                :custom_environment => environment)
       end
-    end
-  end
+      # The shell returns 127 if the command is missing.
+      if output.exitstatus == 127
+        raise ArgumentError, output
+      end
 
-  def seconds
-    fetch_parameters
-    info "Waiting for #{@seconds} seconds..."
-    sleep(@seconds)
-    return @seconds
-  end
-
- private
-
-  def fetch_parameters
-    @query    = resource[:query]
-    @regex    = resource[:regex]
-    @seconds  = resource[:seconds]
-    @environment = resource[:environment]
-    @max_retries = resource[:max_retries]
-    @polling_frequency = resource[:polling_frequency]
-  end
-
-  def set_environment
-    @environment.each do |item|
-      key, value = item.split('=')
-      debug "Setting environment variable #{key}."
-      ENV[key] = value
-    end
-  end
-
-  def set_message(reason)
-    return "wait_for timed out while waiting until #{reason}, " \
-      "after #{@max_retries} retries " \
-      "with polling frequency #{@polling_frequency}."
-  end
-
-  def query_and_wait(message)
-    1.upto(@max_retries) do |i|
-
-      output    = `#{@query}`
-      exit_code = $?
-
-      debug "Retry #{i}"
-      debug "exit code: #{exit_code}"
-      debug "output: #{output}"
-
-      yield(exit_code, output)
-
-      sleep @polling_frequency
+    rescue Errno::ENOENT => detail
+      self.fail Puppet::Error, detail.to_s, detail
     end
 
-    fail message
+    # Return output twice as processstatus was returned before, but only exitstatus was ever called.
+    # Output has the exitstatus on it so it is returned instead. This is here twice as changing this
+    #  would result in a change to the underlying API.
+    return output, output
   end
 end
