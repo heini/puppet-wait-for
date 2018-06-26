@@ -10,9 +10,9 @@ describe Puppet::Type.type(:wait_for) do
     # Illustrating some consequences of acceptable input values due
     # to the type's data type coercion.
     #
-    :exit_code   => [[42.5, 42], [[42], 42], [42, 42], ['42', 42]],
+    :exit_code   => [[42.5, [42]], [[42], [42]], [42, [42]], ['42', [42]], [[1,'2','42'], [1,2,42]]],
     :seconds     => [[42.5, 42], [[42], 42], [42, 42], ['42', 42]],
-    :max_retries => [[42.5, 42], [42, 42], ['42', 42]],
+    :max_retries => [[42.5, 42.5], [42, 42], ['42', 42]],
     :polling_frequency => [[1.5, 1.5], [1, 1.0]],
     :regex             => [[/foo/, /foo/], ['foo', /foo/]],
   }
@@ -63,7 +63,7 @@ describe Puppet::Type.type(:wait_for) do
         :environment => 'foo',
       )
     }.to raise_error(
-      Puppet::ResourceError, %r{foo is not an array}
+      Puppet::ResourceError, %r{Invalid environment setting 'foo'}
     )
   end
 
@@ -74,14 +74,13 @@ describe Puppet::Type.type(:wait_for) do
         :environment => ['foo'],
       )
     }.to raise_error(
-      Puppet::ResourceError, %r{foo is not a key=value pair}
+      Puppet::ResourceError, %r{Invalid environment setting 'foo'}
     )
   end
 
   defaults = {
     :polling_frequency => 0.5,
     :max_retries => 119,
-    :environment => [],
   }
 
   defaults.each do |k,v|

@@ -1,5 +1,7 @@
 require 'puppet/util/execution'
 
+# Most of this code is copied from the Exec provider.
+#
 Puppet::Type.type(:wait_for).provide(:wait_for) do
   include Puppet::Util::Execution
 
@@ -48,9 +50,13 @@ Puppet::Type.type(:wait_for).provide(:wait_for) do
       self.fail Puppet::Error, detail.to_s, detail
     end
 
-    # Return output twice as processstatus was returned before, but only exitstatus was ever called.
-    # Output has the exitstatus on it so it is returned instead. This is here twice as changing this
-    #  would result in a change to the underlying API.
-    return output, output
+    return output
+  end
+
+  def seconds
+    seconds = resource[:seconds]
+    info "Waiting for #{seconds} seconds..."
+    sleep seconds
+    return seconds
   end
 end
