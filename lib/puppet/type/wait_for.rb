@@ -61,7 +61,7 @@ Puppet::Type.newtype(:wait_for) do
           end
         end
       rescue Timeout::Error
-        self.fail Puppet::Error, _("Query exceeded timeout"), $!
+        self.fail Puppet::Error, "Query exceeded timeout", $!
       end
     end
   end
@@ -100,7 +100,7 @@ Puppet::Type.newtype(:wait_for) do
           end
         end
       rescue Timeout::Error
-        self.fail Puppet::Error, _("Query exceeded timeout"), $!
+        self.fail Puppet::Error, "Query exceeded timeout", $!
       end
     end
   end
@@ -120,7 +120,7 @@ Puppet::Type.newtype(:wait_for) do
 
     validate do |command|
       raise ArgumentError,
-        _("Command must be a String, got value of class %{klass}") % { klass: command.class } unless command.is_a?(String)
+        "Command must be a String, got value of class #{command.class}" unless command.is_a?(String)
     end
   end
 
@@ -137,7 +137,7 @@ Puppet::Type.newtype(:wait_for) do
       values = [values] unless values.is_a?(Array)
       values.each do |value|
         unless value =~ /\w+=/
-          raise ArgumentError, _("Invalid environment setting '%{value}'") % { value: value }
+          raise ArgumentError, "Invalid environment setting '#{value}'"
         end
       end
     end
@@ -156,9 +156,9 @@ Puppet::Type.newtype(:wait_for) do
       begin
         value = value.to_f
       rescue ArgumentError
-        raise ArgumentError, _("The timeout must be a number."), $!.backtrace
+        raise ArgumentError, "The timeout must be a number.", $!.backtrace
       end
-      raise ArgumentError, _("The timeout cannot be a negative number") if value < 0
+      raise ArgumentError, "The timeout cannot be a negative number" if value < 0
     end
 
     defaultto 300
@@ -176,11 +176,11 @@ Puppet::Type.newtype(:wait_for) do
     munge do |value|
       if value.is_a?(String)
         unless value =~ /^[\d]+$/
-          raise ArgumentError, _("Tries must be an integer")
+          raise ArgumentError, "Tries must be an integer"
         end
         value = Integer(value)
       end
-      raise ArgumentError, _("Tries must be an integer >= 1") if value < 1
+      raise ArgumentError, "Tries must be an integer >= 1" if value < 1
       value
     end
 
@@ -194,7 +194,7 @@ Puppet::Type.newtype(:wait_for) do
 
     munge do |value|
       value = Float(value)
-      raise ArgumentError, _("polling_frequency cannot be a negative number") if value < 0
+      raise ArgumentError, "polling_frequency cannot be a negative number" if value < 0
       value
     end
 
