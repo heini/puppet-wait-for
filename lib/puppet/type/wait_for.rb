@@ -1,3 +1,63 @@
+# These methods in the Mixins module get "mixed in" to the
+# Exit_code and Regex methods (i.e. properties) below.
+#
+module Mixins
+  def self.included base
+    base.send(:include, InstanceMethods)
+  end
+
+  module InstanceMethods
+
+    # Defining a retrieve method seems to stop Puppet looking for an
+    # exit_code getter method in the provider.
+    #
+    # The idea is copied from the Exec type.
+    #
+    def retrieve
+
+      # See comments about how this works by Daniel Pittman in the Exec
+      # Puppet source code.
+      #
+      if @resource.check_all_attributes
+        return :notrun
+      else
+        return self.should
+      end
+    end
+
+    # Defining a sync method seems to stop Puppet looking for an
+    # exit_code= setter method in the provider.
+    #
+    def sync
+      tries = self.resource[:max_retries]
+      polling_frequency = self.resource[:polling_frequency]
+
+      begin
+        tries.times do |try|
+
+          # Only add debug messages for tries > 1 to reduce log spam.
+          #
+          debug("Wait_for try #{try+1}/#{tries}") if tries > 1
+          @output = provider.run(self.resource[:query])
+
+          if self.class == Puppet::Type::Wait_for::Exit_code
+            break if self.should.include?(@output.exitstatus.to_i)
+          elsif self.class == Puppet::Type::Wait_for::Regex
+            break if @output =~ self.should
+          end
+
+          if polling_frequency > 0 and tries > 1
+            debug("Sleeping for #{polling_frequency} seconds between tries")
+            sleep polling_frequency
+          end
+        end
+      rescue Timeout::Error
+        self.fail Puppet::Error, "Query exceeded timeout", $!
+      end
+    end
+  end
+end
+
 Puppet::Type.newtype(:wait_for) do
   @doc = "Wait for something to happen.
 
@@ -8,7 +68,9 @@ Puppet::Type.newtype(:wait_for) do
     A lot of this code is copy/pasted from Exec."
 
   # Create a new check mechanism.  It's basically just a parameter that
-  # provides one extra 'check' method.
+  # provides one extra 'check' method. This is copied from the Exec type,
+  # in support of the :refreshonly feature.
+  #
   def self.newcheck(name, options = {}, &block)
     @checks ||= {}
 
@@ -20,7 +82,26 @@ Puppet::Type.newtype(:wait_for) do
     @checks.keys
   end
 
+  # Verify that we pass all of the checks.  The argument determines whether
+  # we skip the :refreshonly check, which is necessary because we now check
+  # within refresh
+  def check_all_attributes(refreshing = false)
+    self.class.checks.each { |check|
+      next if refreshing and check == :refreshonly
+      if @parameters.include?(check)
+        val = @parameters[check].value
+        val = [val] unless val.is_a?(Array)
+        val.each do |value|
+          return false unless @parameters[check].check(value)
+        end
+      end
+    }
+    true
+  end
+
   newproperty(:exit_code, :array_matching => :all) do |property|
+    include Mixins
+
     desc "The expected exit code(s). An error will be returned if the
       executed command has some other exit code. Defaults to 0. Can be
       specified as an array of acceptable exit codes or a single value.
@@ -30,43 +111,11 @@ Puppet::Type.newtype(:wait_for) do
     munge do |value|
       value.to_i
     end
-
-    # First verify that all of our checks pass.
-    def retrieve
-      # We need to return :notrun to trigger evaluation; when that isn't
-      # true, we *LIE* about what happened and return a "success" for the
-      # value, which causes us to be treated as in_sync?, which means we
-      # don't actually execute anything.  I think. --daniel 2011-03-10
-      if @resource.check_all_attributes
-        return :notrun
-      else
-        return self.should
-      end
-    end
-
-    # Actually wait for the exit code.
-    def sync
-      tries = self.resource[:max_retries]
-      polling_frequency = self.resource[:polling_frequency]
-
-      begin
-        tries.times do |try|
-          # Only add debug messages for tries > 1 to reduce log spam.
-          debug("Wait_for try #{try+1}/#{tries}") if tries > 1
-          @output = provider.run(self.resource[:query])
-          break if self.should.include?(@output.exitstatus.to_i)
-          if polling_frequency > 0 and tries > 1
-            debug("Sleeping for #{polling_frequency} seconds between tries")
-            sleep polling_frequency
-          end
-        end
-      rescue Timeout::Error
-        self.fail Puppet::Error, "Query exceeded timeout", $!
-      end
-    end
   end
 
   newproperty(:regex) do |property|
+    include Mixins
+
     desc "A regex pattern that is used in conjunction with the
       query parameter. The query is executed, and wait_for waits
       for that pattern to be seen, timing out after :max_retries
@@ -74,34 +123,6 @@ Puppet::Type.newtype(:wait_for) do
 
     munge do |value|
       Regexp.new(value)
-    end
-
-    def retrieve
-      if @resource.check_all_attributes
-        return :notrun
-      else
-        return self.should
-      end
-    end
-
-    def sync
-      max_retries = self.resource[:max_retries]
-      polling_frequency = self.resource[:polling_frequency]
-
-      begin
-        max_retries.times do |try|
-          # Only add debug messages for max_retries > 1 to reduce log spam.
-          debug("Wait_for try #{try+1}/#{max_retries}") if max_retries > 1
-          @output = provider.run(self.resource[:query])
-          break if @output =~ self.should
-          if polling_frequency > 0 and max_retries > 1
-            debug("Sleeping for #{polling_frequency} seconds between tries")
-            sleep polling_frequency
-          end
-        end
-      rescue Timeout::Error
-        self.fail Puppet::Error, "Query exceeded timeout", $!
-      end
     end
   end
 
@@ -237,23 +258,6 @@ Puppet::Type.newtype(:wait_for) do
         true
       end
     end
-  end
-
-  # Verify that we pass all of the checks.  The argument determines whether
-  # we skip the :refreshonly check, which is necessary because we now check
-  # within refresh
-  def check_all_attributes(refreshing = false)
-    self.class.checks.each { |check|
-      next if refreshing and check == :refreshonly
-      if @parameters.include?(check)
-        val = @parameters[check].value
-        val = [val] unless val.is_a?(Array)
-        val.each do |value|
-          return false unless @parameters[check].check(value)
-        end
-      end
-    }
-    true
   end
 
   def refresh
