@@ -52,3 +52,59 @@ include wait_for
 #   query   => 'echo foobar',
 #   regex   => 'foobar',
 # }
+
+# Tests added for the refreshonly feature.
+
+# file { '/tmp/exit_code.sh':
+#   ensure  => file,
+#   mode    => '0755',
+#   content => "#!/bin/bash
+# sleep 5
+# exit 42
+# ",
+# }
+
+# file { '/tmp/gen_log.sh':
+#   ensure => file,
+#   mode   => '0755',
+#   content => "#!/bin/bash
+# sleep 20
+# echo bar >> /tmp/logfile
+# ",
+# }
+
+# notify { 'expecting to see Wait_for A, C and E': }
+
+# notify { 'A': }
+# ~>
+# wait_for { 'A':
+#   seconds     => 1,
+#   refreshonly => true,
+# }
+
+# wait_for { 'B_should_not_run':
+#   seconds     => 5,
+#   refreshonly => true,
+# }
+
+# notify { 'C': }
+# ~>
+# wait_for { 'C':
+#   query       => '/tmp/exit_code.sh',
+#   exit_code   => 42,
+#   refreshonly => true,
+# }
+
+# wait_for { 'D_should_not_run':
+#   query       => 'echo hello',
+#   regex       => 'world',
+#   refreshonly => true,
+# }
+
+# exec { '/tmp/gen_log.sh': }
+# ~>
+# wait_for { 'E':
+#   query       => 'cat /tmp/logfile',
+#   regex       => 'bar',
+#   refreshonly => true,
+# }
