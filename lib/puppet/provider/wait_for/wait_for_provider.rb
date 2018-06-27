@@ -32,13 +32,10 @@ Puppet::Type.type(:wait_for).provide(:wait_for) do
       #
       # This is backwards compatible all the way to Ruby 1.8.7.
       Timeout::timeout(resource[:timeout], Timeout::Error) do
-        # note that we are passing "false" for the "override_locale" parameter, which ensures that the user's
-        # default/system locale will be respected.  Callers may override this behavior by setting locale-related
-        # environment variables (LANG, LC_ALL, etc.) in their 'environment' configuration.
         output = Puppet::Util::Execution.execute(['/bin/sh', '-c', command],
                                 :failonfail => false,
                                 :combine => true,
-                                :override_locale => false,
+                                :override_locale => true,
                                 :custom_environment => environment)
       end
       # The shell returns 127 if the command is missing.
