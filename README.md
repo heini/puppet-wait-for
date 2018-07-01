@@ -11,13 +11,13 @@ That said, there are situations where this might come in handy - for example, wh
 Either install the latest release from puppet forge:
 
 ~~~ text
-puppet module install basti1302-wait_for
+puppet module install heini-wait_for
 ~~~
 
 Or add to your Puppetfile:
 
 ~~~ text
-mod 'basti1302/wait_for'
+mod 'heini/wait_for'
 ~~~
 
 ## Usage

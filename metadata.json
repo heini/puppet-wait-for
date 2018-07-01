@@ -1,11 +1,16 @@
 {
-  "name": "basti1302-wait_for",
-  "version": "0.4.0",
-  "source": "https://github.com/dhs-rec/puppet-wait-for",
+  "name": "heini-wait_for",
+  "version": "2.0.0",
+  "source": "https://github.com/heini/puppet-wait-for.git",
   "author": "Bastian Krol",
   "license": "Apache License, Version 2.0",
   "summary": "A pseudo resource type to wait for a condition to become satisfied.",
-  "project_page": "https://github.com/dhs-rec/puppet-wait-for",
-  "dependencies": [
-  ]
+  "project_page": "https://github.com/heini/puppet-wait-for.git",
+  "requirements": [
+    {
+      "name": "puppet",
+      "version_requirement": ">= 3.0.0 < 6.0.0"
+    }
+  ],
+  "dependencies": []
 }
