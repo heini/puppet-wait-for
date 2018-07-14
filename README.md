@@ -108,3 +108,33 @@ To run the tests from the root of the source code:
 ~~~ text
 bundle exec rake spec
 ~~~
+
+### Release
+
+This module uses Puppet Blacksmith to publish to the Puppet Forge.
+
+Ensure you have these lines in `~/.bash_profile`:
+
+~~~ text
+export BLACKSMITH_FORGE_URL=https://forgeapi.puppetlabs.com
+export BLACKSMITH_FORGE_USERNAME=heini
+export BLACKSMITH_FORGE_PASSWORD=xxxxxxxxx
+~~~
+
+Build the module:
+
+~~~ text
+bundle exec rake build
+~~~
+
+Push to Forge:
+
+~~~ text
+bundle exec rake module:push
+~~~
+
+Clean the pkg dir (otherwise Blacksmith will try to push old copies to Forge next time you run it and it will fail):
+
+~~~ text
+bundle exec rake module:clean
+~~~
