@@ -43,7 +43,7 @@ module Mixins
           if self.class == Puppet::Type::Wait_for::Exit_code
             break if self.should.include?(@output.exitstatus.to_i)
           elsif self.class == Puppet::Type::Wait_for::Regex
-            break if @output =~ self.should
+            break if @output =~ /#{self.should}/
           end
 
           if polling_frequency > 0 and tries > 1
@@ -126,8 +126,9 @@ Puppet::Type.newtype(:wait_for) do
       for that pattern to be seen, timing out after :max_retries
       retries."
 
-    munge do |value|
-      Regexp.new(value)
+    validate do |value|
+      raise ArgumentError,
+        "Regex must be a String, got value of class #{value.class}" unless value.is_a?(String)
     end
   end
 
