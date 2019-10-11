@@ -14,7 +14,7 @@ describe Puppet::Type.type(:wait_for) do
     :seconds     => [[42.5, 42], [[42], 42], [42, 42], ['42', 42]],
     :max_retries => [[42.5, 42.5], [42, 42], ['42', 42]],
     :polling_frequency => [[1.5, 1.5], [1, 1.0]],
-    :regex             => [[/foo/, /foo/], ['foo', /foo/]],
+    :regex             => [['foo', 'foo']],
   }
 
   test_data.each do |k,v|
@@ -75,6 +75,17 @@ describe Puppet::Type.type(:wait_for) do
       )
     }.to raise_error(
       Puppet::ResourceError, %r{Invalid environment setting 'foo'}
+    )
+  end
+
+  it 'errors out if regex is not a string' do
+    expect {
+      Puppet::Type.type(:wait_for).new(
+        :query  => 'echo foo bar',
+        :regex => /foo/,
+      )
+    }.to raise_error(
+      Puppet::ResourceError, %r{Regex must be a String}
     )
   end
 
