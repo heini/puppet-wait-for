@@ -1,6 +1,6 @@
 {
   "name": "heini-wait_for",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "source": "https://github.com/heini/puppet-wait-for.git",
   "author": "Bastian Krol",
   "license": "Apache-2.0",
@@ -9,15 +9,15 @@
   "operatingsystem_support": [
     {
       "operatingsystem": "RedHat",
-      "operatingsystemrelease": [ "5", "6", "7" ]
+      "operatingsystemrelease": [ "5", "6", "7", "8" ]
     },
     {
       "operatingsystem": "CentOS",
-      "operatingsystemrelease": [ "5", "6", "7" ]
+      "operatingsystemrelease": [ "5", "6", "7", "8" ]
     },
     {
       "operatingsystem": "Debian",
-      "operatingsystemrelease": [ "8", "9" ]
+      "operatingsystemrelease": [ "8", "9", "10" ]
     },
     {
       "operatingsystem": "Ubuntu",
@@ -25,13 +25,13 @@
     },
     {
       "operatingsystem": "Windows",
-      "operatingsystemrelease": [ "Server 2008", "Server 2008 R2", "Server 2012", "Server 2012 R2", "Server 2016", "7", "8", "10" ]
+      "operatingsystemrelease": [ "Server 2008", "Server 2008 R2", "Server 2012", "Server 2012 R2", "Server 2016", "Server 2019", "7", "8", "10" ]
     }
   ],
   "requirements": [
     {
       "name": "puppet",
-      "version_requirement": ">= 3.0.0 < 6.0.0"
+      "version_requirement": ">= 3.0.0 < 7.0.0"
     }
   ],
   "dependencies": []
