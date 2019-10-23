@@ -32,6 +32,8 @@ module Mixins
       tries = self.resource[:max_retries]
       polling_frequency = self.resource[:polling_frequency]
 
+      status = false
+
       begin
         tries.times do |try|
 
@@ -41,10 +43,12 @@ module Mixins
           @output = provider.run(self.resource[:query])
 
           if self.class == Puppet::Type::Wait_for::Exit_code
-            break if self.should.include?(@output.exitstatus.to_i)
+            status = self.should.include?(@output.exitstatus.to_i)
           elsif self.class == Puppet::Type::Wait_for::Regex
-            break if @output =~ /#{self.should}/
+            status = @output =~ /#{self.should}/
           end
+
+          break if status
 
           if polling_frequency > 0 and tries > 1
             debug("Sleeping for #{polling_frequency} seconds between tries")
@@ -53,6 +57,14 @@ module Mixins
         end
       rescue Timeout::Error
         self.fail Puppet::Error, "Query exceeded timeout", $!
+      end
+
+      if !status
+        if self.class == Puppet::Type::Wait_for::Exit_code
+          self.fail Puppet::Error, "Exit status #{@output.exitstatus.to_i} after max_retries"
+        elsif self.class == Puppet::Type::Wait_for::Regex
+          self.fail Puppet::Error, "Did not match regex after max_retries"
+        end
       end
     end
   end
