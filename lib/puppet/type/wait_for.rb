@@ -59,7 +59,7 @@ module Mixins
         self.fail Puppet::Error, "Query exceeded timeout", $!
       end
 
-      if !status
+      unless status
         if self.class == Puppet::Type::Wait_for::Exit_code
           self.fail Puppet::Error, "Exit status #{@output.exitstatus.to_i} after max_retries"
         elsif self.class == Puppet::Type::Wait_for::Regex
