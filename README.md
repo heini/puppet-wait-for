@@ -96,6 +96,7 @@ Make sure you have:
 
 * rake
 * bundler
+* Vagrant (for the Beaker tests)
 
 Install the necessary gems:
 
@@ -108,6 +109,16 @@ To run the tests from the root of the source code:
 ```text
 bundle exec rake spec
 ```
+
+To also run the acceptance tests:
+
+```text
+export BEAKER_PUPPET_COLLECTION=puppet6
+export BEAKER_PUPPET_INSTALL_VERSION=6.4.2
+bundle exec rspec spec/acceptance
+```
+
+Tested using Puppet 6.4.2 and Ruby 2.4.1.
 
 ### Release
 
