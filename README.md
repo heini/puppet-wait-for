@@ -1,5 +1,7 @@
 # puppet-wait-for
 
+[![Build Status](https://img.shields.io/travis/heini/puppet-wait-for.svg)](https://travis-ci.org/heini/puppet-wait-for)
+
 A Puppet resource type that enables you to wait for certain conditions. You can use shell commands to query arbitrary things and either react on the exit code or match the output of the command against a regular expression.
 
 Warning: By using this module you are leaving the purist Puppet philosophy - this is not really a resource whose state can updated/kept in sync by Puppet. Also, you might be tempted to use this module to work around issues that should be fixed by other means.
