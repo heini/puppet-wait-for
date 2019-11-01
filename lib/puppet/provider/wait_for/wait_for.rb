@@ -32,11 +32,12 @@ Puppet::Type.type(:wait_for).provide(:wait_for) do
       #
       # This is backwards compatible all the way to Ruby 1.8.7.
       Timeout::timeout(resource[:timeout], Timeout::Error) do
-        output = Puppet::Util::Execution.execute(['/bin/sh', '-c', command],
-                                :failonfail => false,
-                                :combine => true,
-                                :override_locale => true,
-                                :custom_environment => environment)
+        output = Puppet::Util::Execution.execute(
+          command,
+          :failonfail => false,
+          :combine => true,
+          :override_locale => true,
+          :custom_environment => environment)
       end
       # The shell returns 127 if the command is missing.
       if output.exitstatus == 127
