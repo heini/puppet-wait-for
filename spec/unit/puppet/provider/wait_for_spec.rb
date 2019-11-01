@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'puppet/provider/wait_for/wait_for'
 
 describe Puppet::Type.type(:wait_for).provider(:wait_for) do
 
