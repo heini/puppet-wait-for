@@ -29,6 +29,13 @@ module Mixins
     # setter method in the provider.
     #
     def sync
+      if self.resource[:seconds]
+        seconds = resource[:seconds]
+        info "Waiting for #{seconds} seconds..."
+        sleep seconds
+        return seconds
+      end
+
       tries = self.resource[:max_retries]
       polling_frequency = self.resource[:polling_frequency]
 
@@ -145,6 +152,8 @@ Puppet::Type.newtype(:wait_for) do
   end
 
   newproperty(:seconds) do
+    include Mixins
+
     desc "Just wait this number of seconds no matter what."
     munge do |value|
       value.to_i
@@ -283,6 +292,7 @@ Puppet::Type.newtype(:wait_for) do
     if self.check_all_attributes(true)
       self.property(:exit_code).sync unless self.property(:exit_code).nil?
       self.property(:regex).sync     unless self.property(:regex).nil?
+      self.property(:seconds).sync   unless self.property(:seconds).nil?
     end
   end
 
