@@ -1,5 +1,16 @@
-# These methods in the Mixins module get "mixed in" to the
-# Exit_code and Regex methods (i.e. properties) below.
+# All of this code is based on the Exec builtin type.
+#
+# The code complexity in both Exec and in this derived Wait_for type
+# comes from supporting the refreshonly concept, which does not fit
+# Puppet's type/provider model. The hack in Exec and here is to not
+# use the provider at all, and have the types themselves do most of
+# the work.
+#
+# The Mixins module is used in the Wait_for type only to reuse the
+# retrieve and sync methods. This is one point of departure from Exec.
+# In Exec, retrieve and sync are defined only once on the :returns
+# property. Here, they need to be defined on :exit_code, :query and
+# :seconds.
 #
 module Mixins
   def self.included base
@@ -8,15 +19,17 @@ module Mixins
 
   module InstanceMethods
 
-    # Defining a retrieve method seems to stop Puppet looking for an
+    # Defining a retrieve method stops Puppet looking for the
     # getter method in the provider.
-    #
-    # The idea is copied from the Exec type.
     #
     def retrieve
 
-      # See comments about how this works by Daniel Pittman in the Exec
-      # Puppet source code.
+      # Daniel Pittman's comment in the Exec source code:
+      #
+      # "We need to return :notrun to trigger evaluation; when that isn't
+      # true, we *LIE* about what happened and return a "success" for the
+      # value, which causes us to be treated as in_sync?, which means we
+      # don't actually execute anything.  I think. --daniel 2011-03-10"
       #
       if @resource.check_all_attributes
         return :notrun
@@ -25,8 +38,10 @@ module Mixins
       end
     end
 
-    # Defining a sync method seems to stop Puppet looking for an
-    # setter method in the provider.
+    # Defining a sync stops Puppet looking for a setter method
+    # in the provider. Basically, all the provider logic is implemented
+    # here. Except the run method, although I think even that could
+    # really be moved to here.
     #
     def sync
       if self.resource[:seconds]
@@ -106,8 +121,6 @@ Puppet::Type.newtype(:wait_for) do
   # Verify that we pass all of the checks.  The argument determines whether
   # we skip the :refreshonly check, which is necessary because we now check
   # within refresh.
-  #
-  # Copied from Exec, in support of the :refreshonly feature.
   #
   def check_all_attributes(refreshing = false)
     self.class.checks.each { |check|
