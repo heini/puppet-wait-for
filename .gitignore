@@ -4,3 +4,6 @@ pkg
 .project
 Gemfile.lock
 spec/fixtures
+.vagrant
+log
+.bundle
