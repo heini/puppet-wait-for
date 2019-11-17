@@ -12,15 +12,6 @@ describe 'wait_for' do
 
   it 'should successfully find foo' do
     pp = <<~EOF
-      wait_for { 'echo foo':
-        regex => 'foo',
-      }
-    EOF
-    expect(apply_manifest(pp).exit_code).to be_zero
-  end
-
-  it 'should successfully find foo with explicit query' do
-    pp = <<~EOF
       wait_for { 'foo':
         query => 'echo foo',
         regex => 'foo',
@@ -43,7 +34,8 @@ describe 'wait_for' do
 
   it 'should error out after max_retries if exit code is wrong' do
     pp = <<~EOF
-      wait_for { '/usr/bin/false':
+      wait_for { 'wrong exit code':
+        query             => '/usr/bin/false',
         exit_code         => 2,
         polling_frequency => 0.3,
         max_retries       => 5,
@@ -73,7 +65,8 @@ describe 'wait_for' do
 
   it 'should not error out after max_retries if exit code is wrong if refreshonly' do
     pp = <<~EOF
-      wait_for { '/usr/bin/false':
+      wait_for { 'wrong exit code':
+        query             => '/usr/bin/false',
         exit_code         => 2,
         polling_frequency => 0.3,
         max_retries       => 5,
@@ -98,7 +91,8 @@ describe 'wait_for' do
 
   it 'should inject variables' do
     pp = <<~EOF
-      wait_for { 'env':
+      wait_for { 'FOO is set':
+        query       => 'env',
         environment => ['FOO=bar', 'BAR=baz'],
         regex       => 'FOO=.*',
       }
