@@ -1,6 +1,6 @@
 {
   "name": "heini-wait_for",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "source": "https://github.com/heini/puppet-wait-for.git",
   "author": "Bastian Krol",
   "license": "Apache-2.0",
@@ -8,30 +8,76 @@
   "project_page": "https://github.com/heini/puppet-wait-for.git",
   "operatingsystem_support": [
     {
-      "operatingsystem": "RedHat",
-      "operatingsystemrelease": [ "5", "6", "7", "8" ]
+      "operatingsystem": "AlmaLinux",
+      "operatingsystemrelease": [
+        "8",
+        "9"
+      ]
+    },
+    {
+      "operatingsystem": "Archlinux"
     },
     {
       "operatingsystem": "CentOS",
-      "operatingsystemrelease": [ "5", "6", "7", "8" ]
+      "operatingsystemrelease": [
+        "7",
+        "8"
+      ]
     },
     {
       "operatingsystem": "Debian",
-      "operatingsystemrelease": [ "8", "9", "10" ]
+      "operatingsystemrelease": [
+        "10",
+        "11",
+        "12"
+      ]
+    },
+    {
+      "operatingsystem": "OracleLinux",
+      "operatingsystemrelease": [
+        "7",
+        "8",
+        "9"
+      ]
+    },
+    {
+      "operatingsystem": "RedHat",
+      "operatingsystemrelease": [
+        "7",
+        "8",
+        "9"
+      ]
+    },
+    {
+      "operatingsystem": "Rocky",
+      "operatingsystemrelease": [
+        "8",
+        "9"
+      ]
     },
     {
       "operatingsystem": "Ubuntu",
-      "operatingsystemrelease": [ "14.04", "16.04", "18.04" ]
+      "operatingsystemrelease": [
+        "20.04",
+        "22.04",
+        "24.04"
+      ]
     },
     {
       "operatingsystem": "Windows",
-      "operatingsystemrelease": [ "Server 2008", "Server 2008 R2", "Server 2012", "Server 2012 R2", "Server 2016", "Server 2019", "7", "8", "10" ]
+      "operatingsystemrelease": [
+        "Server 2016",
+        "Server 2019",
+        "Server 2022",
+        "10",
+        "11"
+      ]
     }
   ],
   "requirements": [
     {
       "name": "puppet",
-      "version_requirement": ">= 3.0.0 < 7.0.0"
+      "version_requirement": ">= 5.0.0 < 9.0.0"
     }
   ],
   "dependencies": []
