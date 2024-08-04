@@ -49,7 +49,8 @@ wait_for { 'logstash':
 Wait for a Windows MySQL service to start:
 
 ```puppet
-wait_for { 'sc query MySQL5':
+wait_for { 'MySQL service running':
+  query => 'sc query MySQL5',
   regex => '.*STATE\s*:\s*4\s*RUNNING.*',
 }
 ```
@@ -57,7 +58,8 @@ wait_for { 'sc query MySQL5':
 Wait until a command returns an exit code of 5:
 
 ```puppet
-wait_for { 'scp big_file user@remote.com:/tmp':
+wait_for { 'Copy to remote host':
+  query             => 'scp big_file user@remote.com:/tmp',
   exit_code         => 5,   # Handle exit code 5, connection lost.
   polling_frequency => 0.3,
   max_retries       => 5,
@@ -75,18 +77,10 @@ wait_for { 'a_minute':
 Execute a command and inject some environment variables (just like 'exec' does).
 
 ```puppet
-wait_for { 'env':
+wait_for { 'FOO is set':
+  query       => 'env',
   environment => ['FOO=bar', 'BAR=baz'],
   regex       => 'FOO=.*',
-}
-```
-
-Use the query namevar:
-
-```puppet
-wait_for { 'without implicit namevar':
-  query => 'echo foobar',
-  regex => 'foobar',
 }
 ```
 

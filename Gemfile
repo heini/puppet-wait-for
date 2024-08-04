@@ -1,6 +1,7 @@
 source 'https://rubygems.org'
 
 group :development do
+  gem 'pdk'
   gem 'pry'
   gem 'pry-rescue'
   gem 'pry-stack_explorer'
