@@ -2,11 +2,13 @@
 
 [![Build Status](https://img.shields.io/travis/heini/puppet-wait-for.svg)](https://travis-ci.org/heini/puppet-wait-for)
 
-A Puppet resource type that enables you to wait for certain conditions. You can use shell commands to query arbitrary things and either react on the exit code or match the output of the command against a regular expression.
+A Puppet resource type that enables you to either wait for certain amount of time or certain conditions, like
+- shell commands to query arbitrary things and either react on the exit code or match the output of the command against a regular expression, or
+- files or directories to (dis-)appear (new in 3.0)
 
 Warning: By using this module you are leaving the purist Puppet philosophy - this is not really a resource whose state can updated/kept in sync by Puppet. Also, you might be tempted to use this module to work around issues that should be fixed by other means.
 
-That said, there are situations where this might come in handy - for example, when you need to start/stop services in some asynchronous fashion. Puppet's basic assumption is, that when the code to update a resource has finished, then the resource is in the desired state, period. In the real world, this is not always the case, especially if you are doing a lot of things via exec resources and even more if the exec commandforks or kicks off a process which needs some time to come up.
+That said, there are situations where this might come in handy - for example, when you need to start/stop services in some asynchronous fashion. Puppet's basic assumption is, that when the code to update a resource has finished, then the resource is in the desired state, period. In the real world, this is not always the case, especially if you are doing a lot of things via exec resources and even more if the exec command forks or kicks off a process which needs some time to come up.
 
 ## Installation
 
@@ -20,6 +22,26 @@ Or add to your Puppetfile:
 
 ```text
 mod 'heini/wait_for'
+```
+
+## Migrating to version 3.x
+
+With the addition of waiting for files/directories, it doesn't make sense anymore for "query" to be the namevar, which means it must from now on be explicitely provided. For example, instead of writing
+
+```puppet
+wait_for { 'command':
+  exit_code => 0,
+  ...
+}
+```
+one should now write
+
+```puppet
+wait_for { 'command_returns_0':
+  query     => 'command',
+  exit_code => 0,
+  ...
+}
 ```
 
 ## Usage
@@ -84,6 +106,14 @@ wait_for { 'FOO is set':
 }
 ```
 
+Wait for a file/directory to (dis-)appear
+```puppet
+wait_for { 'some_new_file':
+  path  => '/tmp/foo',
+  state => file,   # or present, absent or directory
+}
+```
+
 ## Testing
 
 ### Testing
@@ -109,12 +139,12 @@ bundle exec rake spec
 To also run the acceptance tests:
 
 ```text
-export BEAKER_PUPPET_COLLECTION=puppet6
-export BEAKER_PUPPET_INSTALL_VERSION=6.4.2
+export BEAKER_PUPPET_COLLECTION=puppet7
+export BEAKER_PUPPET_INSTALL_VERSION=7.32.1
 bundle exec rspec spec/acceptance
 ```
 
-Tested using Puppet 6.4.2 and Ruby 2.4.1.
+Tested using Puppet 7.32.1, 8.8.1 and Ruby 3.1.4.
 
 ### Release
 
@@ -124,7 +154,7 @@ Ensure you have these lines in `~/.bash_profile`:
 
 ```text
 export BLACKSMITH_FORGE_URL=https://forgeapi.puppetlabs.com
-export BLACKSMITH_FORGE_USERNAME=heini
+export BLACKSMITH_FORGE_USERNAME=xxxxx
 export BLACKSMITH_FORGE_PASSWORD=xxxxxxxxx
 ```
 
