@@ -1,6 +1,6 @@
 {
   "name": "heini-wait_for",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "source": "https://github.com/heini/puppet-wait-for.git",
   "author": "Bastian Krol",
   "license": "Apache-2.0",
@@ -80,5 +80,7 @@
       "version_requirement": ">= 6.0.0 < 9.0.0"
     }
   ],
-  "dependencies": []
+  "dependencies": [
+
+  ]
 }

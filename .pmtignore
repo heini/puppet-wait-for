@@ -1,0 +1,11 @@
+.fixtures.yml
+.git*
+.pmtignore
+.travis.yml
+.vagrant
+Gemfile*
+Rakefile
+junit
+log
+spec
+tests
