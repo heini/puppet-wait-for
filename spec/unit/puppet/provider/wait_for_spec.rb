@@ -5,6 +5,7 @@ describe Puppet::Type.type(:wait_for).provider(:wait_for) do
   context '#run' do
     let(:resource) do
       Puppet::Type.type(:wait_for).new(
+        :title => 'run a command',
         :query => 'echo foo bar',
         :regex => 'baz',
       )

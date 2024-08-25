@@ -60,14 +60,30 @@ module Mixins
         tries.times do |try|
 
           # Only add debug messages for tries > 1 to reduce log spam.
-          #
           debug("Wait_for try #{try+1}/#{tries}") if tries > 1
-          @output = provider.run(self.resource[:query])
 
-          if self.class == Puppet::Type::Wait_for::Exit_code
-            status = self.should.include?(@output.exitstatus.to_i)
-          elsif self.class == Puppet::Type::Wait_for::Regex
-            status = @output =~ /#{self.should}/
+          # Handle command execution
+          if self.resource[:query]
+            @output = provider.run(self.resource[:query])
+
+            if self.class == Puppet::Type::Wait_for::Exit_code
+              status = self.should.include?(@output.exitstatus.to_i)
+            elsif self.class == Puppet::Type::Wait_for::Regex
+              status = @output =~ /#{self.should}/
+            end
+          elsif self.resource[:path]
+            if self.class == Puppet::Type::Wait_for::State
+              status = case self.should
+                       when :absent
+                         not File.exist?(self.resource[:path])
+                       when :directory
+                         File.directory?(self.resource[:path])
+                       when :file
+                         File.file?(self.resource[:path])
+                       when :present
+                         File.exist?(self.resource[:path])
+                       end
+            end
           end
 
           break if status
@@ -78,7 +94,7 @@ module Mixins
           end
         end
       rescue Timeout::Error
-        self.fail Puppet::Error, "Query exceeded timeout", $!
+        self.fail Puppet::Error, "Exceeded timeout", $!
       end
 
       unless status
@@ -86,6 +102,17 @@ module Mixins
           self.fail Puppet::Error, "Exit status #{@output.exitstatus.to_i} after max_retries"
         elsif self.class == Puppet::Type::Wait_for::Regex
           self.fail Puppet::Error, "Did not match regex after max_retries"
+        elsif self.class == Puppet::Type::Wait_for::State
+          case self.should
+          when :absent
+            self.fail Puppet::Error, "Filesystem element still present after max_retries"
+          when :directory
+            self.fail Puppet::Error, "Filesystem element isn't a directory or doesn't exist after max_retries"
+          when :file
+            self.fail Puppet::Error, "Filesystem element isn't a file or doesn't exist after max_retries"
+          when :present
+            self.fail Puppet::Error, "Filesystem element doesn't exist after max_retries"
+          end
         end
       end
     end
@@ -160,16 +187,45 @@ Puppet::Type.newtype(:wait_for) do
 
     validate do |value|
       raise ArgumentError,
-        "Regex must be a String, got value of class #{value.class}" unless value.is_a?(String)
+        "Regex must be of type String, got value of class #{value.class}" unless value.is_a?(String)
     end
+  end
+
+  newproperty(:state) do |property|
+    include Mixins
+
+    desc "If path is specified: Whether the filesystem element should be absent,
+      present, a file or a directory.
+
+      When present is specified, we only test for existence, regardles of type."
+
+    newvalues(:absent, :directory, :file, :present)
   end
 
   newproperty(:seconds) do
     include Mixins
-
     desc "Just wait this number of seconds no matter what."
+
     munge do |value|
-      value.to_i
+      value.to_f
+    end
+  end
+
+  newparam(:title, :namevar => true) do
+    desc "A short, unique description of what we're waiting for."
+
+    validate do |value|
+      raise ArgumentError,
+        "Title must be of type String, got value of class #{value.class}" unless value.is_a?(String)
+    end
+  end
+
+  newparam(:path) do
+    desc "A path on the filesystem which should (dis-)appear."
+
+    validate do |value|
+      raise ArgumentError,
+        "Path must be of type String, got value of class #{value.class}" unless value.is_a?(String)
     end
   end
 
@@ -177,22 +233,16 @@ Puppet::Type.newtype(:wait_for) do
     desc "The command to execute. The output of this command
       will be matched against the regex."
 
-    isnamevar
-
     validate do |command|
       raise ArgumentError,
-        "Command must be a String, got value of class #{command.class}" unless command.is_a?(String)
+        "Command must be of type String, got value of class #{command.class}" unless command.is_a?(String)
     end
   end
 
   newparam(:environment) do
     desc "An array of any additional environment variables you want to set for a
       command, such as `[ 'HOME=/root', 'MAIL=root@example.com']`.
-      Note that if you use this to set PATH, it will override the `path`
-      attribute. Multiple environment variables should be specified as an
-      array.
-
-      This was copied from the Exec type."
+      Multiple environment variables should be specified as an array."
 
     validate do |values|
       values = [values] unless values.is_a?(Array)
@@ -237,11 +287,11 @@ Puppet::Type.newtype(:wait_for) do
     munge do |value|
       if value.is_a?(String)
         unless value =~ /^[\d]+$/
-          raise ArgumentError, "Tries must be an integer"
+          raise ArgumentError, "Max_retries must be an integer"
         end
         value = Integer(value)
       end
-      raise ArgumentError, "Tries must be an integer >= 1" if value < 1
+      raise ArgumentError, "Max_retries must be an integer >= 1" if value < 1
       value
     end
 
@@ -255,7 +305,7 @@ Puppet::Type.newtype(:wait_for) do
 
     munge do |value|
       value = Float(value)
-      raise ArgumentError, "polling_frequency cannot be a negative number" if value < 0
+      raise ArgumentError, "Polling_frequency cannot be a negative number" if value < 0
       value
     end
 
@@ -306,17 +356,42 @@ Puppet::Type.newtype(:wait_for) do
       self.property(:exit_code).sync unless self.property(:exit_code).nil?
       self.property(:regex).sync     unless self.property(:regex).nil?
       self.property(:seconds).sync   unless self.property(:seconds).nil?
+      self.property(:state).sync   unless self.property(:state).nil?
+      self.property(:type).sync   unless self.property(:type).nil?
     end
   end
 
   validate do
-    unless self[:regex] or self[:exit_code] or self[:seconds]
-      fail "Exactly one of regex, seconds or exit_code is required."
+    # We either wait for some seconds, execute a command (query) or check a
+    # path on the filesystem
+    if ((self[:seconds] and not self[:path].nil?) or
+        (self[:seconds] and not self[:query].nil?) or
+        (not self[:query].nil? and not self[:path].nil?))
+      fail "Attributes path, query and seconds are mutually exclusive."
     end
-    if (self[:regex] and not self[:exit_code].nil?) or
-       (self[:regex] and not self[:seconds].nil?) or
-       (not self[:exit_code].nil? and not self[:seconds].nil?)
-      fail "Attributes regex, seconds and exit_code are mutually exclusive."
+
+    # If a query command was provided, we either check for an exit code or a
+    # regex, but not both
+    if self[:query]
+      unless ((self[:regex] and self[:exit_code].nil?) or
+              (self[:exit_code] and self[:regex].nil?))
+        fail "Exactly one of regex or exit_code is required."
+      end
+      # We also don't want the state of a filesystem element in this case
+      if self[:state]
+        fail "Attribute state is not allowed with query."
+      end
+    end
+
+    # If a path was provided, we also expect a state...
+    if self[:path]
+      unless self[:state]
+        fail "Attribute state is required together with path."
+      end
+      # ...but no regex or exit_code
+      if self[:regex] or self[:exit_code]
+        fail "Attributes regex and exit_code are not allowed with path."
+      end
     end
   end
 end
